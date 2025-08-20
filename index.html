@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>LAS Tracker — Login / Register</title>
+  <link rel="stylesheet" href="LoginStyle.css" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+</head>
+<body>
+
+  <div id="loadingScreen" class="loading-overlay" style="display:none;">
+  <div class="spinner"></div>
+  <p>Loading, please wait...</p>
+</div>
+
+
+  <!-- Login Page -->
+  <div class="container" id="loginPage">
+    <h2>Log-in to your account</h2>
+    
+    <input type="text" id="userID" placeholder="Email"><br>
+    <input type="password" id="password" placeholder="Password"><br>
+    <button id="loginBtn">Login</button>
+    <div class="extra-links">
+  <p>No account yet? <a href="#" id="toRegister">Create one</a></p>
+  <p><a href="#" id="forgotPasswordLink">Forgot your password?</a></p>
+  <div id="resetMessage"></div>
+</div>
+
+<div id="resetMessage" style="color: lightgreen; margin-top: 10px;"></div>
+
+
+    <div id="loginError"></div>
+  </div>
+
+  <!-- Register Page -->
+  <div class="container" id="registerPage" style="display:none;">
+    <h2>Create a New Student Account</h2>
+    <input type="text" id="regName" placeholder="Full Name">
+    <input type="text" id="regID" placeholder="Student ID">
+    <input type="email" id="regEmail" placeholder="Email">
+    <input type="password" id="regPassword" placeholder="Password">
+
+
+<!-- Grade Level -->
+<select id="regGradeLevel">
+  <option value="">-- Select Grade Level --</option>
+  <option value="Grade 11">Grade 11</option>
+  <option value="Grade 12">Grade 12</option>
+</select>
+
+<!-- Section -->
+<select id="regSection">
+  <option value="">-- Select Section --</option>
+
+  <optgroup label="Grade 11">
+    <option value="Simplicity">Simplicity</option>
+    <option value="Humility">Humility</option>
+    <option value="Stewardship">Stewardship</option>
+    <option value="Competence">Competence</option>
+    <option value="Family Spirit">Family Spirit</option>
+    <option value="Excellence">Excellence</option>
+    <option value="Integrity">Integrity</option>
+  </optgroup>
+
+  <optgroup label="Grade 12">
+    <option value="Indonesia">Indonesia</option>
+    <option value="Myanmar">Myanmar</option>
+    <option value="Cambodia">Cambodia</option>
+    <option value="Philippines">Philippines</option>
+    <option value="Vietnam">Vietnam</option>
+  </optgroup>
+</select>
+<button id="resetGradeBtn" type="button" style="display:none;">🔄 Change Grade Level</button>
+
+
+    
+
+    <div class="button-group">
+  <button id="createAccountBtn">Create Account</button>
+  <button id="backToLoginBtn" class="secondary-btn">🔙 Back to Login</button>
+</div>
+
+    <div id="registerError"></div>
+  </div>
+
+  <script type="module" src="./auth.js"></script>
+</body>
+</html>

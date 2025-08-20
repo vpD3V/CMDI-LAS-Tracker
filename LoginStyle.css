@@ -1,0 +1,355 @@
+/* ===== DARK MODE NEON THEME ===== */
+
+/* Base reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Background gradient animation */
+body {
+  background: linear-gradient(-45deg, #0d0d0d, #1a1a2e, #16213e, #0f3460);
+  background-size: 400% 400%;
+  animation: gradientMove 15s ease infinite;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Glassmorphic containers */
+.container {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  padding: 2rem;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  width: 350px;
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.15),
+              0 0 50px rgba(138, 43, 226, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.container:hover {
+  transform: translateY(-4px);
+}
+
+/* Titles */
+h1, h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #00fff7;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+}
+
+/* Inputs */
+input, select {
+  width: 100%;
+  padding: 0.8rem;
+  margin: 0.5rem 0 1rem;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+input:focus, select:focus {
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 10px #00fff7;
+}
+
+/* Buttons */
+button {
+  width: 100%;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #00fff7, #8a2be2);
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  box-shadow: 0 0 15px #00fff7, 0 0 30px #8a2be2;
+  transform: scale(1.05);
+}
+
+/* Links */
+a {
+  color: #8a2be2;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #00fff7;
+}
+
+/* Subject List Styling */
+.subject-list {
+  list-style: none;
+}
+
+.subject-title {
+  color: #ffffff;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  display: inline-block;
+  font-size: large;
+  text-shadow: #00fff7 0px 0px 10px , #8a2be2 0px 0px 20px  ;
+}
+
+/* LAS checkboxes grid layout (for both student & teacher panels) */
+.las-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+  margin-top: 0.5rem;
+  text-align: left;
+}
+
+.las-checkboxes label {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.las-checkboxes label:hover {
+  background: rgba(0, 255, 247, 0.1);
+  box-shadow: 0 0 8px rgba(0, 255, 247, 0.4);
+}
+
+
+/* Error messages */
+#error, .error {
+  color: #ff4d4d;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* Fade animation for pages */
+.fade {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== DASHBOARD FIXES ===== */
+
+/* Center the student/teacher app content */
+#studentApp, #teacherApp {
+  max-width: 900px;
+  margin: auto;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Subject list centered & responsive */
+.subject-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 0;
+}
+
+.subject-list li {
+  width: 100%;
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Smaller floating logout button */
+#logoutBtn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: auto;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #ff4d4d, #b30000);
+  box-shadow: 0 0 10px rgba(255, 77, 77, 0.7);
+  z-index: 1000;
+}
+
+#logoutBtn:hover {
+  box-shadow: 0 0 15px rgba(255, 77, 77, 1);
+  transform: scale(1.05);
+}
+
+/* Make sure dropdowns & form controls are centered in teacher view */
+#teacherApp select,
+#teacherApp button {
+  max-width: 400px;
+  margin: 0.5rem auto;
+  display: block;
+}
+
+/* Make select dropdown match dark theme */
+select {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem;
+  outline: none;
+  cursor: pointer;
+  appearance: none; /* remove default arrow style */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Arrow icon for select */
+select {
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23ffffff' height='24' width='24' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+}
+
+/* Hover & focus effect */
+select:hover, select:focus {
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 10px #00fff7;
+}
+
+/* Fix for white text disappearing in dropdown */
+select option {
+  background-color: #1a1a2e; /* dark background for dropdown list */
+  color: #fff;               /* white text */
+}
+
+select option:checked {
+  background-color: #00fff7; /* highlight color when selected */
+  color: #000;               /* black text when highlighted */
+}
+
+/* Group buttons inside register form */
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.button-group button {
+  flex: 1; /* equal size */
+}
+
+.secondary-btn {
+  background: linear-gradient(90deg, #444, #222);
+}
+
+.secondary-btn:hover {
+  box-shadow: 0 0 15px #8a2be2, 0 0 30px #00fff7;
+}
+
+#error, .error, #loginError, #registerError {
+  color: #ff4d4d;
+  text-align: center;
+  margin-top: 0.5rem;
+  text-shadow: 0 0 8px rgba(255, 77, 77, 0.7);
+}
+
+.extra-links {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.extra-links a {
+  color: #8a2be2;
+  font-weight: 500;
+}
+
+.extra-links a:hover {
+  color: #00fff7;
+}
+
+#resetMessage {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-shadow: 0 0 8px rgba(0, 255, 247, 0.6);
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  color: #00fff7;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.spinner {
+  border: 6px solid rgba(255, 255, 255, 0.2);
+  border-top: 6px solid #00fff7;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Uniform LAS Box Style (Teacher + Student) */
+.las-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.las-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f9f9f9;
+  font-size: 0.9rem;
+}
+
+.las-checkbox input[type="checkbox"] {
+  transform: scale(1.2);
+  cursor: pointer;
+}

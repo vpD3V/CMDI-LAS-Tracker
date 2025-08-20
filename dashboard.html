@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>LAS Tracker — Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="LoginStyle.css" />
+</head>
+<body>
+  <button id="logoutBtn" style="display:none;" onclick="handleLogout()">Logout</button>
+
+  <div id="loadingScreen" class="loading-overlay" style="display:none;">
+  <div class="spinner"></div>
+  <p>Loading, please wait...</p>
+</div>
+
+
+  <!-- Student View -->
+  <div id="studentApp" style="display:none;">
+  <div id="greetingText" class="greeting"></div>
+  <p id="studentInfo"></p>
+
+  <!-- Subject selector -->
+  <label for="studentSubjectSelect">Select Subject:</label>
+  <select id="studentSubjectSelect">
+    <option value="">-- Choose Subject --</option>
+  </select>
+
+  <!-- Checklist container -->
+  <ul class="subject-list" id="subjectList"></ul>
+</div>
+
+
+  <!-- Teacher View -->
+  <div class="container" id="teacherApp" style="display:none;">
+    <h2>Teacher Panel - Update LAS</h2>
+
+    <label for="gradeSelect">Select Grade Level:</label>
+    <select id="gradeSelect">
+      <option value="">-- Select Grade --</option>
+      <option value="Grade 11">Grade 11</option>
+      <option value="Grade 12">Grade 12</option>
+    </select>
+
+    <label for="sectionSelect">Select Section:</label>
+    <select id="sectionSelect">
+      <option value="">-- Select Section --</option>
+    </select>
+    <span id="sectionLoading" style="display:none; font-size:12px; color:gray;">⏳ Loading sections...</span>
+
+    <label for="studentSelect">Select Student:</label>
+    <select id="studentSelect" onchange="showStudentSubjects()">
+      <option value="">-- Select Student --</option>
+    </select>
+    <span id="studentLoading" style="display:none; font-size:12px; color:gray;">⏳ Loading students...</span>
+
+    <div id="editSubjects"></div>
+    <span id="subjectsLoading" style="display:none; font-size:12px; color:gray;">⏳ Loading subjects...</span>
+    <button id="saveChangesBtn">💾 Save Changes</button>
+  </div>
+
+  <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, query, where, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyBgehM22uCpXI5NDqd1vfvMMWnN4GZfOWY",
+  authDomain: "las-tracking.firebaseapp.com",
+  projectId: "las-tracking",
+  storageBucket: "las-tracking.firebasestorage.app",
+  messagingSenderId: "715146359357",
+  appId: "1:715146359357:web:63346d7abf61c5444a3054"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// UI refs
+const logoutBtn = document.getElementById("logoutBtn");
+const studentApp = document.getElementById("studentApp");
+const teacherApp = document.getElementById("teacherApp");
+
+window.teacherSubjects = {}; // global para sa filtering
+
+onAuthStateChanged(auth, async (user) => {
+  showLoading();
+  try {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+    logoutBtn.style.display = "inline-block";
+
+    // Check kung teacher siya
+    const teacherDoc = await getDoc(doc(db, "teachers", user.uid));
+    if (teacherDoc.exists()) {
+      const teacherData = teacherDoc.data();
+      console.log("🔥 Teacher doc data:", teacherData);
+
+      // Build teacherSubjects from boolean fields
+      window.teacherSubjects = {};
+      for (let key in teacherData) {
+        if (teacherData[key] === true) {
+          window.teacherSubjects[key] = true;
+        }
+      }
+
+      console.log("✅ Teacher assigned subjects:", window.teacherSubjects);
+
+      studentApp.style.display = "none";
+      teacherApp.style.display = "block";
+      initTeacherPanel();
+    } else {
+      // Student view
+      teacherApp.style.display = "none";
+      studentApp.style.display = "block";
+      await showStudentView(user.uid);
+    }
+  } catch (err) {
+    console.error("Error during auth state change:", err);
+  } finally {
+    hideLoading();
+  }
+});
+
+
+
+// Logout
+window.handleLogout = async function () {
+  await signOut(auth);
+  sessionStorage.clear();
+  window.location.href = "index.html";
+};
+
+/* ==========================
+   STUDENT VIEW
+========================== */
+async function showStudentView(uid) {
+  try {
+    const ref = doc(db, "students", uid);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) {
+      document.getElementById("greetingText").innerHTML =
+        "<span style='color:red;'>⚠️ No student profile found in the database.</span>";
+      return;
+    }
+
+    const data = snap.data();
+    document.getElementById("greetingText").innerHTML =
+      `Good day, <strong>${(data.name || "Student").toUpperCase()}</strong>!`;
+    document.getElementById("studentInfo").innerHTML =
+      `Section: <strong>${data.section || ""}</strong> | Grade Level: <strong>${data.gradeLevel || ""}</strong>`;
+
+    const subjects = data.subjects || {};
+    const subjectSelect = document.getElementById("studentSubjectSelect");
+    subjectSelect.innerHTML = `<option value="">-- Choose Subject --</option>`;
+
+    Object.keys(subjects).forEach(subj => {
+      subjectSelect.innerHTML += `<option value="${subj}">${subj}</option>`;
+    });
+
+    subjectSelect.addEventListener("change", () => {
+      const selected = subjectSelect.value;
+      const list = document.getElementById("subjectList");
+      list.innerHTML = "";
+      if (!selected) return;
+
+      const lasData = subjects[selected] || {};
+      let lasHTML = "";
+      for (let i = 1; i <= 20; i++) {
+        const lasKey = `LAS${i}`;
+        const checkedAttr = lasData[lasKey] ? "checked" : "";
+        lasHTML += `
+          <label class="las-checkbox">
+            <input type="checkbox" ${checkedAttr} onclick="return false;">
+            <strong>${lasKey}</strong>
+          </label>
+        `;
+      }
+      list.innerHTML = `
+        <li>
+          <span class="subject-title"><strong>${selected}</strong></span>
+          <div class="las-checkboxes">${lasHTML}</div>
+        </li>
+      `;
+    });
+  } catch (err) {
+    console.error("Error in showStudentView():", err);
+  }
+}
+
+
+/* ==========================
+   TEACHER VIEW
+========================== */
+function initTeacherPanel() {
+  const gradeSelect = document.getElementById("gradeSelect");
+  const sectionSelect = document.getElementById("sectionSelect");
+  const studentSelect = document.getElementById("studentSelect");
+  const sectionLoading = document.getElementById("sectionLoading");
+  const studentLoading = document.getElementById("studentLoading");
+
+  gradeSelect.addEventListener("change", async () => {
+    const grade = gradeSelect.value;
+    sectionSelect.innerHTML = `<option value="">-- Select Section --</option>`;
+    studentSelect.innerHTML = `<option value="">-- Select Student --</option>`;
+    if (!grade) return;
+
+    sectionLoading.style.display = "inline"; // show loader
+    const q = query(collection(db, "students"), where("gradeLevel", "==", grade));
+    const snapshot = await getDocs(q);
+
+    const sections = new Set();
+    snapshot.forEach(docSnap => {
+      const studentData = docSnap.data();
+      if (studentData.section) sections.add(studentData.section);
+    });
+
+    sections.forEach(sec => {
+      sectionSelect.innerHTML += `<option value="${sec}">${sec}</option>`;
+    });
+    sectionLoading.style.display = "none"; // hide loader
+  });
+
+  sectionSelect.addEventListener("change", async () => {
+    const grade = gradeSelect.value;
+    const section = sectionSelect.value;
+    studentSelect.innerHTML = `<option value="">-- Select Student --</option>`;
+    if (!grade || !section) return;
+
+    studentLoading.style.display = "inline"; // show loader
+    const q = query(
+      collection(db, "students"),
+      where("gradeLevel", "==", grade),
+      where("section", "==", section)
+    );
+    const snapshot = await getDocs(q);
+
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      studentSelect.innerHTML += `<option value="${docSnap.id}">${data.name} (${data.studentId})</option>`;
+    });
+    studentLoading.style.display = "none"; // hide loader
+  });
+}
+window.showStudentSubjects = async function () {
+  const id = document.getElementById("studentSelect").value;
+  const container = document.getElementById("editSubjects");
+  const subjectsLoading = document.getElementById("subjectsLoading");
+
+  container.innerHTML = "";
+  if (!id) return;
+
+  subjectsLoading.style.display = "inline"; // show loader
+  const snap = await getDoc(doc(db, "students", id));
+  if (!snap.exists()) {
+    subjectsLoading.style.display = "none";
+    return;
+  }
+
+  const subj = snap.data().subjects || {};
+
+  for (let subject in subj) {
+    if (!window.teacherSubjects[subject]) continue;
+
+    let lasHTML = "";
+    for (let i = 1; i <= 20; i++) {
+      const lasKey = `LAS${i}`;
+      const checked = subj[subject][lasKey] ? "checked" : "";
+      lasHTML += `
+        <label>
+          <input type="checkbox" data-subject="${subject}" data-las="${lasKey}" ${checked}>
+          <strong>${lasKey}</strong>
+        </label>
+      `;
+    }
+
+    container.innerHTML += `
+      <div style="margin-bottom:15px;">
+        <span class="subject-title"><strong>${subject}</strong></span>
+        <div class="las-checkboxes">${lasHTML}</div>
+      </div>
+    `;
+  }
+
+  // 👉 FIX: update subj when teacher clicks checkboxes
+  document.querySelectorAll('#editSubjects input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener("change", (e) => {
+      const subject = e.target.getAttribute("data-subject");
+      const lasKey = e.target.getAttribute("data-las");
+      subj[subject][lasKey] = e.target.checked;
+    });
+  });
+
+  // Save button
+  document.getElementById("saveChangesBtn").onclick = async () => {
+    try {
+      console.log("Saving subj:", JSON.stringify(subj, null, 2)); // Debug log
+      await setDoc(doc(db, "students", id), { subjects: subj }, { merge: true });
+      alert("✅ Changes saved.");
+    } catch (err) {
+      console.error("❌ Error saving changes:", err);
+      alert("❌ Failed to save changes: " + err.message);
+    }
+  };
+
+  subjectsLoading.style.display = "none"; // hide loader
+};
+
+function showLoading() {
+  document.getElementById("loadingScreen").style.display = "flex";
+}
+function hideLoading() {
+  document.getElementById("loadingScreen").style.display = "none";
+}
+
+
+</script>
+
+</body>
+</html>
