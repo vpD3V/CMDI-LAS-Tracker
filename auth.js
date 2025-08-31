@@ -334,23 +334,6 @@ document.getElementById("createAccountBtn")?.addEventListener("click", async () 
       });
     }
 
-    else if (section === "Myanmar") {
-      [
-        "Research in Daily Life 2",
-        "Cookery 1",
-        "Cookery 2",
-        "Introduction to the Philosophy of Human Person",
-        "Physical Science",
-        "English for Academic and Professional Purpose",
-        "Pagsulat ng Filipino sa Piling Larang",
-        "Phillipine Politics and Governance",
-        "21st Century Literature from the Philippines and the World",
-        "Physical Education and Health",
-      ].forEach(subj => {
-        lasTemplate[subj] = { ...lasFields };
-      });
-    }
-
     else {
       // Default subjects kung walang match na section
       [
@@ -455,4 +438,5 @@ function showLoading() {
 }
 function hideLoading() {
   document.getElementById("loadingScreen").style.display = "none";
+
 }
