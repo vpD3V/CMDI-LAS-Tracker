@@ -54,9 +54,16 @@
     </select>
     <span id="studentLoading" style="display:none; font-size:12px; color:gray;">⏳ Loading students...</span>
 
+    <label for="teacherSubjectSelect">Select Subject:</label>
+<select id="teacherSubjectSelect">
+  <option value="">-- Select Subject --</option>
+</select>
+
+
     <div id="editSubjects"></div>
     <span id="subjectsLoading" style="display:none; font-size:12px; color:gray;">⏳ Loading subjects...</span>
     <button id="saveChangesBtn">💾 Save Changes</button>
+
   </div>
 
   <script type="module">
@@ -252,43 +259,79 @@ window.showStudentSubjects = async function () {
   const id = document.getElementById("studentSelect").value;
   const container = document.getElementById("editSubjects");
   const subjectsLoading = document.getElementById("subjectsLoading");
+  const teacherSubjectSelect = document.getElementById("teacherSubjectSelect");
 
   container.innerHTML = "";
+  teacherSubjectSelect.innerHTML = `<option value="">-- Select Subject --</option>`;
   if (!id) return;
 
-  subjectsLoading.style.display = "inline"; // show loader
+  subjectsLoading.style.display = "inline"; 
   const snap = await getDoc(doc(db, "students", id));
   if (!snap.exists()) {
     subjectsLoading.style.display = "none";
     return;
   }
 
+  // ✅ Get student subjects
   const subj = snap.data().subjects || {};
+  window.currentStudentSubjects = subj;
 
+  console.log("📌 Student subjects:", subj);
+  console.log("📌 Teacher subjects:", window.teacherSubjects);
+
+  // ✅ Populate dropdown pero limit lang sa hawak ni teacher
   for (let subject in subj) {
     if (!window.teacherSubjects[subject]) continue;
+    teacherSubjectSelect.innerHTML += `<option value="${subject}">${subject}</option>`;
+  }
 
-    let lasHTML = "";
-    for (let i = 1; i <= 20; i++) {
-      const lasKey = `LAS${i}`;
-      const checked = subj[subject][lasKey] ? "checked" : "";
-      lasHTML += `
-        <label>
-          <input type="checkbox" data-subject="${subject}" data-las="${lasKey}" ${checked}>
-          <strong>${lasKey}</strong>
-        </label>
-      `;
-    }
+  // ✅ Auto-select first subject kung meron
+  const firstOption = teacherSubjectSelect.options[1]; 
+  if (firstOption) {
+    teacherSubjectSelect.value = firstOption.value;
+    filterStudentSubject(); // render agad LAS checkboxes
+  }
 
-    container.innerHTML += `
-      <div style="margin-bottom:15px;">
-        <span class="subject-title"><strong>${subject}</strong></span>
-        <div class="las-checkboxes">${lasHTML}</div>
-      </div>
+  // ✅ Event listener kapag nagpalit ng subject
+  teacherSubjectSelect.onchange = filterStudentSubject;
+
+  subjectsLoading.style.display = "none"; 
+};
+
+
+
+
+  // ==========================
+// Filter at render ng LAS
+// ==========================
+window.filterStudentSubject = function () {
+  const selectedSubj = document.getElementById("teacherSubjectSelect").value;
+  const container = document.getElementById("editSubjects");
+  const subj = window.currentStudentSubjects || {};
+  container.innerHTML = "";
+
+  if (!selectedSubj || !subj[selectedSubj]) return;
+
+  let lasHTML = "";
+  for (let i = 1; i <= 20; i++) {
+    const lasKey = `LAS${i}`;
+    const checked = subj[selectedSubj][lasKey] ? "checked" : "";
+    lasHTML += `
+      <label>
+        <input type="checkbox" data-subject="${selectedSubj}" data-las="${lasKey}" ${checked}>
+        <strong>${lasKey}</strong>
+      </label>
     `;
   }
 
-  // 👉 FIX: update subj when teacher clicks checkboxes
+  container.innerHTML = `
+    <div style="margin-bottom:15px;">
+      <span class="subject-title"><strong>${selectedSubj}</strong></span>
+      <div class="las-checkboxes">${lasHTML}</div>
+    </div>
+  `;
+
+  // Update subj kapag nag check/uncheck si teacher
   document.querySelectorAll('#editSubjects input[type="checkbox"]').forEach(cb => {
     cb.addEventListener("change", (e) => {
       const subject = e.target.getAttribute("data-subject");
@@ -299,8 +342,8 @@ window.showStudentSubjects = async function () {
 
   // Save button
   document.getElementById("saveChangesBtn").onclick = async () => {
+    const id = document.getElementById("studentSelect").value;
     try {
-      console.log("Saving subj:", JSON.stringify(subj, null, 2)); // Debug log
       await setDoc(doc(db, "students", id), { subjects: subj }, { merge: true });
       alert("✅ Changes saved.");
     } catch (err) {
@@ -308,9 +351,8 @@ window.showStudentSubjects = async function () {
       alert("❌ Failed to save changes: " + err.message);
     }
   };
-
-  subjectsLoading.style.display = "none"; // hide loader
 };
+
 
 function showLoading() {
   document.getElementById("loadingScreen").style.display = "flex";
