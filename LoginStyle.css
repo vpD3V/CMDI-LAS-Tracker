@@ -356,17 +356,16 @@ select option:checked {
   cursor: pointer;
 }
 
-/* === Password field with working eye icon === */
+/* === Password field with eye icon INSIDE input (aligned right) === */
 .password-row {
   position: relative;
-  display: flex;
-  align-items: center;
+  width: 100%;
   margin-bottom: 1rem;
 }
 
 .password-row input {
   width: 100%;
-  padding: 0.8rem 2.5rem 0.8rem 0.8rem;
+  padding: 0.8rem 2.5rem 0.8rem 0.8rem; /* right padding para di masapawan ng icon */
   font-size: 1rem;
   border: none;
   border-radius: 8px;
@@ -381,9 +380,12 @@ select option:checked {
   box-shadow: 0 0 10px #00743b;
 }
 
+/* Eye icon positioning */
 .eye-icon {
   position: absolute;
-  right: 12px;
+  top: 50%;
+  right: 12px;              /* dikit sa kanan sa loob */
+  transform: translateY(-50%); /* center vertically */
   font-size: 1.2rem;
   color: #ccc;
   cursor: pointer;
@@ -393,6 +395,7 @@ select option:checked {
 
 .eye-icon:hover {
   color: #fff;
-  transform: scale(1.1);
+  transform: translateY(-50%) scale(1.1);
 }
+
 
