@@ -356,7 +356,7 @@ select option:checked {
   cursor: pointer;
 }
 
-/* === Password field with eye icon INSIDE input (aligned right) === */
+/* === FIXED PASSWORD FIELD WITH EYE ICON === */
 .password-row {
   position: relative;
   width: 100%;
@@ -365,37 +365,39 @@ select option:checked {
 
 .password-row input {
   width: 100%;
-  padding: 0.8rem 2.5rem 0.8rem 0.8rem; /* right padding para di masapawan ng icon */
+  padding: 10px 40px 10px 12px; /* space on the right for the icon */
   font-size: 1rem;
   border: none;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
   outline: none;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
   transition: all 0.3s ease;
 }
 
 .password-row input:focus {
   background: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 0 10px #00743b;
+  box-shadow: 0 0 10px #00ff99;
 }
 
-/* Eye icon positioning */
+/* Eye icon perfectly inside the input */
 .eye-icon {
   position: absolute;
-  top: 50%;
-  right: 12px;              /* dikit sa kanan sa loob */
-  transform: translateY(-50%); /* center vertically */
+  top: 50%;              /* vertical center */
+  right: 14px;           /* near right border */
+  transform: translateY(-50%);
   font-size: 1.2rem;
   color: #ccc;
   cursor: pointer;
   user-select: none;
-  transition: color 0.2s ease, transform 0.1s;
+  transition: color 0.2s ease, transform 0.15s ease;
 }
 
 .eye-icon:hover {
   color: #fff;
   transform: translateY(-50%) scale(1.1);
 }
+
 
 
