@@ -394,12 +394,20 @@ document.getElementById("loginBtn")?.addEventListener("click", async () => {
     const isTeacher = teacherDoc.exists();
 
     if (isTeacher) {
-      const teacherData = teacherDoc.data();
-      sessionStorage.setItem("teacher_subjects", JSON.stringify(teacherData.subjects || {}));
-      sessionStorage.setItem("teacher_name", teacherData.name || "");
-    } else {
-      sessionStorage.setItem("student_uid", uid);
-    }
+  const teacherData = teacherDoc.data();
+
+  // ✅ BAGO: kunin kung anong grade levels ang hawak ng teacher
+  const grades = [];
+  if (teacherData["Grade 11"] === true) grades.push("Grade 11");
+  if (teacherData["Grade 12"] === true) grades.push("Grade 12");
+  sessionStorage.setItem("teacher_grades", JSON.stringify(grades));
+
+  // ✅ DATI (iniwan)
+  sessionStorage.setItem("teacher_subjects", JSON.stringify(teacherData.subjects || {}));
+  sessionStorage.setItem("teacher_name", teacherData.name || "");
+} else {
+  sessionStorage.setItem("student_uid", uid);
+}
 
     sessionStorage.setItem("las_role", isTeacher ? "teacher" : "student");
     sessionStorage.setItem("las_user_email", email);
